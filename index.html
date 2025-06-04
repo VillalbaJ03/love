@@ -1465,69 +1465,234 @@
         heart.addEventListener('touchend', (e) => {
             e.preventDefault();
             activateHeart();
-        });
-          // Configuración de audio mejorada para móviles
+        });        // Configuración de audio mejorada para móviles con soporte Android específico
         let userInteracted = false;
+        let audioUnlocked = false;
         let isAndroid = /Android/i.test(navigator.userAgent);
         let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
         let isMobile = isAndroid || isIOS;
-        
+          // Configuración inicial del audio con optimizaciones para Android
         audio.volume = 0;
-        audio.preload = "auto";
+        audio.preload = isAndroid ? "auto" : "metadata"; // Preload completo en Android
+        audio.crossOrigin = "anonymous"; // Para compatibilidad cross-origin
+        
+        // Configuración específica para Android
+        if (isAndroid) {
+            // Configuraciones adicionales para Android Chrome
+            audio.controls = false;
+            audio.muted = false;
+            console.log('Configuración específica de Android aplicada');
+        }
+        
         audio.load();
         
         let audioLoaded = false;
+        audio.addEventListener('loadeddata', () => {
+            audioLoaded = true;
+            musicText.textContent = 'Spark - Coldplay';
+            console.log('Audio cargado correctamente');
+        });
+        
         audio.addEventListener('canplaythrough', () => {
             audioLoaded = true;
             musicText.textContent = 'Spark - Coldplay';
+            console.log('Audio listo para reproducir');
         });
         
-        audio.addEventListener('error', () => {
+        audio.addEventListener('error', (e) => {
             audioLoaded = false;
             musicText.textContent = 'Audio no disponible';
+            console.error('Error de audio:', e);
         });
         
-        // Función mejorada para dispositivos móviles
-        function enableAudio() {
-            if (!userInteracted) {
-                userInteracted = true;
-                audio.volume = isMobile ? 0.7 : 0.5; // Volumen más alto en móviles
-                tapHint.style.display = 'none';
-                
-                // Para Android Chrome, intentar reproducir silenciosamente
-                if (isAndroid) {
+        // Event listeners adicionales para debugging en Android
+        if (isAndroid) {
+            audio.addEventListener('loadstart', () => console.log('Android: Carga iniciada'));
+            audio.addEventListener('progress', () => console.log('Android: Progreso de carga'));
+            audio.addEventListener('canplay', () => console.log('Android: Puede reproducir'));
+            audio.addEventListener('playing', () => console.log('Android: Reproduciendo'));
+            audio.addEventListener('pause', () => console.log('Android: Pausado'));
+            audio.addEventListener('stalled', () => console.log('Android: Carga detenida'));
+            audio.addEventListener('suspend', () => console.log('Android: Carga suspendida'));
+        }
+          // Función específica para desbloquear audio en Android con múltiples técnicas
+        async function unlockAudioForAndroid() {
+            if (isAndroid && !audioUnlocked) {
+                try {
+                    console.log('Intentando desbloquear audio para Android...');
+                    
+                    // Técnica 1: Crear AudioContext y un buffer silencioso
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        const audioContext = new AudioContext();
+                        
+                        // Crear buffer silencioso
+                        const buffer = audioContext.createBuffer(1, 1, 22050);
+                        const source = audioContext.createBufferSource();
+                        source.buffer = buffer;
+                        source.connect(audioContext.destination);
+                        source.start(0);
+                        
+                        // Forzar que el contexto se inicie
+                        if (audioContext.state === 'suspended') {
+                            await audioContext.resume();
+                        }
+                        
+                        console.log('AudioContext state:', audioContext.state);
+                    }
+                    
+                    // Técnica 2: Reproducir el audio real silenciosamente
                     audio.muted = true;
-                    audio.play().then(() => {
-                        audio.muted = false;
+                    audio.volume = 0;
+                    audio.currentTime = 0;
+                    
+                    try {
+                        await audio.play();
+                        console.log('Audio play() exitoso');
                         audio.pause();
                         audio.currentTime = 0;
-                    }).catch(() => {
-                        console.log('Audio autoplay blocked');
+                    } catch (playError) {
+                        console.log('Error en audio.play():', playError);
+                    }
+                    
+                    // Técnica 3: Configurar el audio para Android
+                    audio.muted = false;
+                    audio.volume = 0.7;
+                    audio.preload = "auto";
+                    
+                    // Técnica 4: Event listener para cuando el audio esté listo
+                    const audioReadyPromise = new Promise((resolve) => {
+                        if (audio.readyState >= 2) {
+                            resolve();
+                        } else {
+                            audio.addEventListener('canplay', resolve, { once: true });
+                        }
                     });
+                    
+                    await audioReadyPromise;
+                    
+                    audioUnlocked = true;
+                    console.log('Audio desbloqueado exitosamente para Android');
+                    
+                } catch (error) {
+                    console.error('Error completo al desbloquear audio en Android:', error);
+                    
+                    // Fallback: Al menos configurar el audio básicamente
+                    audio.muted = false;
+                    audio.volume = 0.7;
+                    audioUnlocked = false;
+                }
+            }
+        }
+          // Función mejorada para dispositivos móviles con énfasis en Android
+        async function enableAudio() {
+            if (!userInteracted) {
+                userInteracted = true;
+                tapHint.style.display = 'none';
+                
+                console.log('Primera interacción del usuario detectada');
+                
+                // Configurar volumen inicial
+                audio.volume = isMobile ? 0.7 : 0.5;
+                
+                // Para Android, ejecutar múltiples técnicas de desbloqueo
+                if (isAndroid) {
+                    console.log('Dispositivo Android detectado, aplicando técnicas específicas...');
+                    await unlockAudioForAndroid();
+                    
+                    // Técnica adicional: Forzar carga del audio
+                    try {
+                        audio.load();
+                        console.log('Audio recargado para Android');
+                    } catch (e) {
+                        console.log('Error al recargar audio:', e);
+                    }
+                } else if (isIOS) {
+                    console.log('Dispositivo iOS detectado');
+                    // Para iOS, configuración más simple
+                    audio.volume = 0.6;
                 }
             }
         }
         
-        // Eventos de interacción mejorados para móviles
+        // Eventos de interacción mejorados específicamente para Android
         document.body.addEventListener('click', enableAudio);
-        document.body.addEventListener('touchstart', enableAudio, { passive: true });
+        
+        document.body.addEventListener('touchstart', async (e) => {
+            await enableAudio();
+            
+            // Para Android, intentar desbloquear en cada touchstart hasta que funcione
+            if (isAndroid && !audioUnlocked) {
+                console.log('Touchstart en Android - intentando desbloquear audio');
+                await unlockAudioForAndroid();
+            }
+        }, { passive: true });
+        
         document.body.addEventListener('touchend', enableAudio, { passive: true });
-          // Control de música - Eventos mejorados para móviles
+        
+        // Evento específico para Android: doble toque
+        if (isAndroid) {
+            let touchCount = 0;
+            document.addEventListener('touchend', async () => {
+                touchCount++;
+                if (touchCount >= 2 && !audioUnlocked) {
+                    console.log('Doble toque detectado en Android - forzando desbloqueo de audio');
+                    await unlockAudioForAndroid();
+                }
+                
+                // Reset contador después de 1 segundo
+                setTimeout(() => { touchCount = 0; }, 1000);
+            }, { passive: true });
+        }// Control de música mejorado especialmente para Android
         async function toggleMusic() {
             try {
-                if (!audioLoaded) return;
+                if (!audioLoaded) {
+                    console.log('Audio no está cargado todavía');
+                    musicText.textContent = 'Cargando audio...';
+                    return;
+                }
+                
+                // Para Android, asegurar que el audio esté desbloqueado
+                if (isAndroid && !audioUnlocked) {
+                    await unlockAudioForAndroid();
+                }
                 
                 if (audio.paused) {
-                    await audio.play();
-                    musicBtn.textContent = '⏸';
-                    musicText.textContent = 'Reproduciendo...';
+                    console.log('Intentando reproducir audio...');
+                    
+                    // Configuración específica para Android antes de reproducir
+                    if (isAndroid) {
+                        audio.volume = 0.7;
+                        audio.currentTime = 0;
+                    }
+                    
+                    const playPromise = audio.play();
+                    
+                    if (playPromise !== undefined) {
+                        await playPromise;
+                        musicBtn.textContent = '⏸';
+                        musicText.textContent = 'Reproduciendo...';
+                        console.log('Audio reproduciéndose correctamente');
+                    }
                 } else {
+                    console.log('Pausando audio...');
                     audio.pause();
                     musicBtn.textContent = '▶️';
                     musicText.textContent = 'Spark - Coldplay';
                 }
             } catch (error) {
+                console.error('Error al controlar música:', error);
+                musicText.textContent = 'Error de audio';
                 tapHint.style.display = 'block';
+                tapHint.textContent = 'Toca varias veces para activar audio en Android';
+                
+                // En Android, mostrar botón para reintentar
+                if (isAndroid) {
+                    musicBtn.textContent = '🔄';
+                    setTimeout(() => {
+                        musicBtn.textContent = '▶️';
+                    }, 2000);
+                }
             }
         }
         
@@ -1802,8 +1967,7 @@
                 }, { passive: true });
             }
         });
-        
-        // Añadir el CSS para el efecto ripple
+          // Añadir el CSS para el efecto ripple
         const rippleStyle = document.createElement('style');
         rippleStyle.textContent = `
             @keyframes rippleEffect {
@@ -1820,6 +1984,40 @@
             }
         `;
         document.head.appendChild(rippleStyle);
+        
+        // Inicialización específica para Android
+        if (isAndroid) {
+            console.log('Aplicando inicializaciones específicas para Android...');
+            
+            // Preparar el audio específicamente para Android Chrome
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log('DOM cargado - preparando audio para Android');
+                
+                // Configuración adicional del audio
+                audio.autoplay = false;
+                audio.muted = false;
+                
+                // Mostrar hint específico para Android
+                if (tapHint) {
+                    tapHint.textContent = 'Toca varias veces para activar audio en Android';
+                    tapHint.style.display = 'block';
+                }
+            });
+            
+            // Evento específico cuando la página está completamente cargada
+            window.addEventListener('load', () => {
+                console.log('Página completamente cargada en Android');
+                setTimeout(() => {
+                    // Intentar precargar el audio después de 1 segundo
+                    try {
+                        audio.load();
+                        console.log('Audio recargado después de cargar página en Android');
+                    } catch (e) {
+                        console.log('Error al recargar audio en Android:', e);
+                    }
+                }, 1000);
+            });
+        }
         
         // Para iOS
         window.addEventListener('touchstart', () => {}, { once: true });
