@@ -198,9 +198,7 @@
             100% {
                 filter: brightness(1.2) drop-shadow(0 0 20px rgba(124, 77, 255, 0.4));
             }
-        }
-
-        .card-button {
+        }        .card-button {
             background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
             color: white;
             border: none;
@@ -215,6 +213,10 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
+            touch-action: manipulation; /* Mejora la respuesta táctil */
+            -webkit-tap-highlight-color: transparent; /* Elimina highlight en móviles */
+            user-select: none; /* Previene selección de texto */
+            -webkit-user-select: none; /* Safari */
         }
 
         .card-button::before {
@@ -411,9 +413,7 @@
             width: 0%;
             transition: width 1s linear;
             box-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
-        }
-
-        .heart {
+        }        .heart {
             font-size: 5rem;
             background: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
             -webkit-background-clip: text;
@@ -425,6 +425,10 @@
             filter: drop-shadow(0 0 20px rgba(255, 64, 129, 0.5));
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
+            touch-action: manipulation; /* Mejora la respuesta táctil */
+            -webkit-tap-highlight-color: transparent; /* Elimina highlight en móviles */
+            user-select: none; /* Previene selección de texto */
+            -webkit-user-select: none; /* Safari */
         }
 
         .heart::before {
@@ -629,6 +633,10 @@
             -webkit-backdrop-filter: blur(15px);
             position: relative;
             overflow: hidden;
+            touch-action: manipulation; /* Mejora la respuesta táctil */
+            -webkit-tap-highlight-color: transparent; /* Elimina highlight en móviles */
+            user-select: none; /* Previene selección de texto */
+            -webkit-user-select: none; /* Safari */
         }
 
         /* Arreglo específico para iOS */
@@ -750,7 +758,43 @@
                 filter: blur(1px);
                 box-shadow: 0 0 10px var(--color, #4fc3f7);
             }
-        }        /* Responsive mejorado con arreglos iOS */
+        }        /* Mejoras adicionales para móviles - interactividad táctil */
+        button, .card-button, .heart, .music-btn, .future-btn, .close-infinite {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        
+        /* Estados activos mejorados para móviles */
+        .card-button:active, .heart:active, .music-btn:active, .future-btn:active {
+            transform: scale(0.95);
+            opacity: 0.8;
+        }
+        
+        /* Prevenir doble-tap zoom en iOS */
+        * {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* Permitir selección de texto solo donde es necesario */
+        p, span, div.spark-message {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+
+        /* Responsive mejorado con arreglos iOS */
         @media (max-width: 600px) {
             .love-container {
                 padding: 25px;
@@ -1075,9 +1119,7 @@
             justify-content: center;
             margin-top: 30px;
             flex-wrap: wrap;
-        }
-
-        .future-btn {
+        }        .future-btn {
             background: linear-gradient(135deg, 
                 rgba(79, 195, 247, 0.8) 0%, 
                 rgba(124, 77, 255, 0.8) 100%);
@@ -1095,6 +1137,10 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.2);
             position: relative;
             overflow: hidden;
+            touch-action: manipulation; /* Mejora la respuesta táctil */
+            -webkit-tap-highlight-color: transparent; /* Elimina highlight en móviles */
+            user-select: none; /* Previene selección de texto */
+            -webkit-user-select: none; /* Safari */
         }
 
         .future-btn::before {
@@ -1211,9 +1257,7 @@
                 transform: translateY(-15px) scale(1.2); 
                 opacity: 1;
             }
-        }
-
-        .close-infinite {
+        }        .close-infinite {
             background: rgba(255, 64, 129, 0.8);
             color: white;
             border: none;
@@ -1222,6 +1266,10 @@
             cursor: pointer;
             margin-top: 20px;
             transition: all 0.3s ease;
+            touch-action: manipulation; /* Mejora la respuesta táctil */
+            -webkit-tap-highlight-color: transparent; /* Elimina highlight en móviles */
+            user-select: none; /* Previene selección de texto */
+            -webkit-user-select: none; /* Safari */
         }
 
         .close-infinite:hover {
@@ -1334,33 +1382,41 @@
         const musicText = document.getElementById('music-text');
         const tapHint = document.getElementById('tap-hint');
         const audio = document.getElementById('coldplay-audio');
-        
-        // Mostrar carta
-        openCardBtn.addEventListener('click', () => {
+          // Mostrar carta - Eventos mejorados para móviles
+        function openCard() {
             openCardBtn.style.display = 'none';
             card.style.display = 'block';
             setTimeout(() => {
                 card.classList.add('flip');
             }, 500);
-        });
-          // Mostrar corazón
-        openHeartBtn.addEventListener('click', () => {
+        }
+        
+        openCardBtn.addEventListener('click', openCard);
+        openCardBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            openCard();
+        });          // Mostrar corazón - Eventos mejorados para móviles
+        function openHeart() {
             card.style.display = 'none';
             heartContainer.style.display = 'block';
             
             // Mostrar la indicación para tocar el corazón
             const heartHint = document.getElementById('heart-hint');
             heartHint.style.display = 'block';
+        }
+        
+        openHeartBtn.addEventListener('click', openHeart);
+        openHeartBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            openHeart();
         });
 
         // Variables para el contador
         const countdownContainer = document.getElementById('countdown-container');
         const countdownTimer = document.getElementById('countdown-timer');
         const progressBar = document.getElementById('progress-bar');
-        let countdownInterval;
-
-        // Mostrar mensaje final al tocar el corazón con contador
-        heart.addEventListener('click', () => {
+        let countdownInterval;        // Mostrar mensaje final al tocar el corazón con contador - Eventos mejorados para móviles
+        function activateHeart() {
             // Ocultar la indicación
             const heartHint = document.getElementById('heart-hint');
             heartHint.style.display = 'none';
@@ -1403,6 +1459,12 @@
                     }, 500);
                 }
             }, 1000);
+        }
+        
+        heart.addEventListener('click', activateHeart);
+        heart.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            activateHeart();
         });
           // Configuración de audio mejorada para móviles
         let userInteracted = false;
@@ -1450,9 +1512,8 @@
         document.body.addEventListener('click', enableAudio);
         document.body.addEventListener('touchstart', enableAudio, { passive: true });
         document.body.addEventListener('touchend', enableAudio, { passive: true });
-        
-        // Control de música
-        musicBtn.addEventListener('click', async () => {
+          // Control de música - Eventos mejorados para móviles
+        async function toggleMusic() {
             try {
                 if (!audioLoaded) return;
                 
@@ -1468,7 +1529,13 @@
             } catch (error) {
                 tapHint.style.display = 'block';
             }
-        });        // Crear chispas mejoradas con más variedad
+        }
+        
+        musicBtn.addEventListener('click', toggleMusic);
+        musicBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            toggleMusic();
+        });// Crear chispas mejoradas con más variedad
         function createSparks() {
             for (let i = 0; i < 40; i++) {
                 const spark = document.createElement('div');
@@ -1658,8 +1725,7 @@
             // Animación de entrada del contenedor
             setTimeout(() => {
                 document.querySelector('.love-container').style.opacity = '1';
-            }, 100);
-              // Efectos de interacción mejorados para móviles
+            }, 100);            // Efectos de interacción mejorados para móviles
             document.body.addEventListener('click', (e) => {
                 launchSparks(e.clientX, e.clientY);
                 
@@ -1680,9 +1746,9 @@
                 setTimeout(() => ripple.remove(), 600);
             });
             
-            // Eventos táctiles mejorados para Android e iOS
+            // Eventos táctiles mejorados específicamente para móviles
             document.body.addEventListener('touchstart', (e) => {
-                e.preventDefault();
+                // No prevenir por defecto aquí para mantener compatibilidad
                 const touch = e.touches[0];
                 launchSparks(touch.clientX, touch.clientY);
                 
@@ -1690,11 +1756,27 @@
                 if (navigator.vibrate && isMobile) {
                     navigator.vibrate(50);
                 }
-            }, { passive: false });
+            }, { passive: true });
             
             document.body.addEventListener('touchend', (e) => {
                 const touch = e.changedTouches[0];
                 launchSparks(touch.clientX, touch.clientY);
+                
+                // Efecto de ondas para móviles
+                const ripple = document.createElement('div');
+                ripple.style.position = 'fixed';
+                ripple.style.left = touch.clientX + 'px';
+                ripple.style.top = touch.clientY + 'px';
+                ripple.style.width = '10px';
+                ripple.style.height = '10px';
+                ripple.style.borderRadius = '50%';
+                ripple.style.background = 'rgba(255, 64, 129, 0.3)';
+                ripple.style.transform = 'translate(-50%, -50%)';
+                ripple.style.pointerEvents = 'none';
+                ripple.style.zIndex = '1000';
+                ripple.style.animation = 'rippleEffect 0.6s ease-out';
+                document.body.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
             }, { passive: true });
               // Parallax suave en el scroll optimizado para móviles
             if (!isMobile) {
