@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Para Bri 💙 | Spark de Coldplay</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            background: linear-gradient(135deg, #000000, #1a1a2e);
+            text-align: center;
+            padding: 20px;
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+        h1 {
+            color: #4fc3f7;
+            font-size: 2em;
+            text-shadow: 0 0 10px rgba(79, 195, 247, 0.7);
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(-30px);
+            animation: fadeInDown 1.2s 0.2s forwards;
+        }
+        @keyframes fadeInDown {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        #mensaje {
+            font-size: 1.5em;
+            color: #4fc3f7;
+            opacity: 0;
+            transition: opacity 1.5s, transform 1.2s cubic-bezier(.68,-0.55,.27,1.55);
+            margin: 20px 0;
+            padding: 0 15px;
+            transform: translateY(30px) scale(0.95);
+        }
+        #mensaje.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1.05);
+            filter: drop-shadow(0 0 8px #4fc3f7aa);
+        }
+        #main-btn {
+            background: transparent;
+            color: #4fc3f7;
+            border: 2px solid #4fc3f7;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 20px 0;
+            box-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        #main-btn::after {
+            content: '';
+            position: absolute;
+            left: -75%;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, #4fc3f7aa, transparent);
+            transition: left 0.4s;
+            z-index: 1;
+            pointer-events: none;
+        }
+        #main-btn:hover::after {
+            left: 120%;
+        }
+        #main-btn:hover {
+            box-shadow: 0 0 20px #4fc3f7, 0 0 40px #4fc3f7aa;
+        }
+        .sparks {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .spark {
+            position: absolute;
+            width: calc(2px + 2vw * var(--size));
+            height: calc(2px + 2vw * var(--size));
+            background: var(--color, #4fc3f7);
+            border-radius: 50%;
+            animation: sparkle 2s infinite;
+            opacity: 0;
+            filter: blur(0.5px);
+        }
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1.2) rotate(10deg); box-shadow: 0 0 8px var(--color, #4fc3f7); }
+        }
+        #music-container {
+            position: fixed;
+            bottom: 15px;
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        #music-btn {
+            background: rgba(79, 195, 247, 0.3);
+            border: none;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.3em;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+            transition: box-shadow 0.3s, background 0.3s;
+        }
+        #music-btn:active {
+            background: rgba(79, 195, 247, 0.5);
+            box-shadow: 0 0 20px #4fc3f7;
+        }
+        #music-text {
+            color: #4fc3f7;
+            font-size: 0.9em;
+            text-align: center;
+        }
+        .hidden {
+            display: none !important;
+        }
+        #tap-hint {
+            color: #4fc3f7;
+            font-size: 0.8em;
+            margin-top: 10px;
+            opacity: 0.7;
+        }
+        .subtitle {
+            color: #4fc3f7;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: fadeInUp 1.2s 0.4s forwards;
+        }
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sparks" id="sparks"></div>
+    
+    <h1>Para Bri, mi Spark 💙</h1>
+    <p class="subtitle">«Porque iluminas mi vida como esta canción...»</p>
+    <button id="main-btn">Descubre mi mensaje</button>
+    <p id="mensaje">«Briggitte Paola: Eres esa chispa que enciende mi corazón cada día. Como dice Coldplay, eres mi 'Spark' eterno.»</p>
+    <div id="tap-hint" class="hidden">Toca la pantalla para activar el audio</div>
+    
+    <div id="music-container">
+        <button id="music-btn">▶️</button>
+        <div id="music-text">Spark - Coldplay</div>
+    </div>
+
+    <!-- Audio - IMPORTANTE: Reemplaza con tu enlace real -->
+    <audio id="coldplay-audio" loop>
+        <source src="Coldplay - Sparks.mp3" type="audio/mp3">
+        <!-- Ejemplo temporal - Reemplázalo con tu MP3 -->
+    </audio>
+
+    <script>
+        // Elementos principales
+        const mainBtn = document.getElementById('main-btn');
+        const mensaje = document.getElementById('mensaje');
+        const musicContainer = document.getElementById('music-container');
+        const musicBtn = document.getElementById('music-btn');
+        const musicText = document.getElementById('music-text');
+        const tapHint = document.getElementById('tap-hint');
+        const audio = document.getElementById('coldplay-audio');
+        
+        // 1. Configuración inicial segura para móviles
+        let isAudioReady = false;
+        let userInteracted = false;
+        
+        // 2. Precargar audio silenciosamente
+        audio.volume = 0;
+        audio.preload = "auto";
+        audio.load();
+
+        // Comprobación de carga de audio
+        let audioLoaded = false;
+        audio.addEventListener('canplaythrough', () => {
+            audioLoaded = true;
+            musicText.textContent = 'Spark - Coldplay';
+        });
+        audio.addEventListener('error', () => {
+            audioLoaded = false;
+            musicText.textContent = 'Audio no disponible';
+        });
+        
+        // 3. Habilitar audio después de la interacción del usuario
+        function enableAudio() {
+            if (!userInteracted) {
+                userInteracted = true;
+                audio.volume = 0.5;
+                tapHint.classList.add('hidden');
+            }
+        }
+        
+        // 4. Detectar cualquier interacción del usuario
+        document.body.addEventListener('click', enableAudio);
+        document.body.addEventListener('touchstart', enableAudio);
+        
+        // 5. Control de música mejorado
+        musicBtn.addEventListener('click', async () => {
+            try {
+                if (!audioLoaded) {
+                    musicText.textContent = 'Audio no disponible';
+                    return;
+                }
+                if (audio.paused) {
+                    await audio.play();
+                    musicBtn.textContent = '⏸';
+                    musicText.textContent = 'Reproduciendo...';
+                } else {
+                    audio.pause();
+                    musicBtn.textContent = '▶️';
+                    musicText.textContent = 'Spark - Coldplay';
+                }
+            } catch (error) {
+                musicText.textContent = 'Toca para activar el audio';
+                tapHint.classList.remove('hidden');
+            }
+        });
+        
+        // 6. Función principal al hacer clic en el botón
+        mainBtn.addEventListener('click', () => {
+            // Mostrar mensaje y efectos
+            mensaje.classList.add('visible');
+            mainBtn.classList.add('hidden');
+            
+            // Crear efectos visuales
+            for (let i = 0; i < 30; i++) {
+                const spark = document.createElement('div');
+                spark.className = 'spark';
+                // Variedad de tamaño y color
+                const size = Math.random();
+                const colors = ['#4fc3f7', '#80d8ff', '#b388ff', '#fff176', '#ff8a65'];
+                spark.style.setProperty('--size', size.toFixed(2));
+                spark.style.setProperty('--color', colors[Math.floor(Math.random() * colors.length)]);
+                spark.style.left = Math.random() * 100 + 'vw';
+                spark.style.top = Math.random() * 100 + 'vh';
+                spark.style.animationDelay = Math.random() * 2 + 's';
+                document.getElementById('sparks').appendChild(spark);
+            }
+            
+            // Mostrar controles de música
+            musicContainer.style.display = 'flex';
+            tapHint.classList.remove('hidden');
+            
+            // Precargar audio para reproducción futura
+            audio.load();
+            isAudioReady = true;
+        });
+        
+        // 7. Solución para Safari/iOS
+        window.addEventListener('touchstart', () => {
+            // Vacío intencional - solo para activar la reproducción de audio
+        }, { once: true });
+    </script>
+</body>
+</html>
